@@ -1,0 +1,48 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: shogomizuno
+# "service" is the name of this project. This will also be added to your AWS resource names.
+service: LangChainBook-ChatGPTSlackFunction
+
+provider:
+  name: aws
+  region: ap-northeast-1
+  stage: dev
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - lambda:InvokeFunction
+          Resource: "*"
+package:
+  patterns:
+    - '!.venv/**'
+    - '!.env/**'
+    - '!.gitignore'
+    - '!.python-version'
+    - '!.git/**'
+
+functions:
+  app:
+    name: LangChainBook-ChatGPTSlackFunction-${sls:stage}-app
+    handler: app.handler
+    runtime: python3.11
+    memorySize: 512
+    timeout: 900
+    url: true
+
+plugins:
+  - serverless-python-requirements
+  - serverless-dotenv-plugin
+
+# https://github.com/pydantic/pydantic/issues/6557#issuecomment-2132167460
+custom:
+  pythonRequirements:
+      useStaticCache: false
+      useDownloadCache: false
+      pipCmdExtraArgs:
+        - "--platform manylinux2014_x86_64"
+        - "--implementation cp"
+        - "--python-version 3.11"
+        - "--only-binary=:all:"
+        - "--upgrade"
